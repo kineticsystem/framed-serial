@@ -10,7 +10,6 @@
   - [Build the Project](#build-the-project)
 - [Using the Library](#using-the-library)
   - [Open a Connection](#open-a-connection)
-  - [Create a Connection from ros2\_control](#create-a-connection-from-ros2_control)
   - [Test Without a Serial Port](#test-without-a-serial-port)
 - [Tests](#tests)
 - [Limitations](#limitations)
@@ -22,7 +21,6 @@ Framed Serial is a C++ library and ROS2 package that sends and receives messages
 
 - Write a message as one frame, with its delimiters, escaped bytes and CRC.
 - Read the next frame, check its CRC and return its data, or throw an exception on a timeout or a damaged frame.
-- Create a connection from the parameters of a `ros2_control` hardware interface.
 - Replace the serial port with a mock in unit tests, through the `Serial` and `FramedSerial` interfaces.
 
 The frames are simple enough for a microcontroller to read and write with a few lines of code and a small buffer, so the library suits a host that talks to an Arduino, a Teensy or a similar board.
@@ -51,7 +49,7 @@ To build Framed Serial, we need a computer with Ubuntu 24.04 and ROS2 Jazzy. Ple
 The library depends on two packages:
 
 - [`serial`](https://github.com/kineticsystem/serial), branch `ros2`, a cross-platform serial port library.
-- `hardware_interface`, from `ros2_control`, for the factories that read the parameters of a hardware interface. `rosdep` installs it.
+- `rclcpp`, for logging. It comes with ROS2.
 
 ## Install Framed Serial
 
@@ -136,27 +134,6 @@ std::vector<uint8_t> answer = connection.read();  // the data of the next frame
 - **the CRC does not match**, `CRC error`.
 
 The caller decides what to do: a driver usually retries the request a few times before it reports the device as lost.
-
-### Create a Connection from ros2_control
-
-A `ros2_control` hardware interface creates the connection from its `HardwareInfo`, with `DefaultFramedSerialFactory`. The factory reads these hardware parameters:
-
-| Parameter | Default | Description |
-|---|---|---|
-| `usb_port` | `/dev/ttyACM0` | The serial port. |
-| `baudrate` | `9600` | The speed of the serial port, in bits per second. |
-| `timeout` | `0.2` | Seconds to wait for each byte of an answer. |
-
-For example, in the `ros2_control` block of a URDF:
-
-```xml
-<hardware>
-  <plugin>my_driver/MyHardware</plugin>
-  <param name="usb_port">/dev/ttyUSB0</param>
-  <param name="baudrate">9600</param>
-  <param name="timeout">0.2</param>
-</hardware>
-```
 
 ### Test Without a Serial Port
 

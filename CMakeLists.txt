@@ -29,12 +29,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # software find all required transitive dependencies to use this library.
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     rclcpp
-    hardware_interface
     serial
 )
 
 find_package(ament_cmake REQUIRED)
-find_package(hardware_interface REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(serial REQUIRED)
 
@@ -54,22 +52,16 @@ add_library(
     include/framed_serial/crc_utils.hpp
     include/framed_serial/default_framed_serial.hpp
     include/framed_serial/framed_serial.hpp
-    include/framed_serial/framed_serial_factory.hpp
     include/framed_serial/data_utils.hpp
     include/framed_serial/serial_exception.hpp
     include/framed_serial/default_serial.hpp
-    include/framed_serial/default_serial_factory.hpp
     include/framed_serial/default_framed_serial.hpp
-    include/framed_serial/default_framed_serial_factory.hpp
     include/framed_serial/serial.hpp
-    include/framed_serial/serial_factory.hpp
     src/crc_utils.cpp
     src/default_framed_serial.cpp
     src/data_utils.cpp
     src/default_serial.cpp
-    src/default_serial_factory.cpp
     src/default_framed_serial.cpp
-    src/default_framed_serial_factory.cpp
 )
 target_include_directories(
     framed_serial
