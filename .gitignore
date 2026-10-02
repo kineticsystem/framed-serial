@@ -1,0 +1,11 @@
+# ROS
+build
+install
+log
+.cache
+
+# QtCreator
+*.user
+
+# VSCode
+.vscode
