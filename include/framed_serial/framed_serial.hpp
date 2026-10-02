@@ -20,17 +20,32 @@
 
 #pragma once
 
-#include <memory>
+#include <cstdint>
+#include <vector>
 
-#include <cobs_serial/cobs_serial.hpp>
-
-#include <hardware_interface/hardware_info.hpp>
-
-namespace cobs_serial
+namespace framed_serial
 {
-class CobsSerialFactory
+class FramedSerial
 {
 public:
-  virtual std::unique_ptr<CobsSerial> create(const hardware_interface::HardwareInfo& info) const = 0;
+  virtual ~FramedSerial() = default;
+
+  virtual void open() = 0;
+  virtual bool is_open() = 0;
+  virtual void close() = 0;
+
+  /**
+   * Read a sequence of bytes from the serial port.
+   * @return The bytes read.
+   * @throw framed_serial::SerialException
+   */
+  virtual std::vector<uint8_t> read() = 0;
+
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param bytes The bytes to read.
+   * @throw framed_serial::SerialException
+   */
+  virtual void write(const std::vector<uint8_t>& bytes) = 0;
 };
-}  // namespace cobs_serial
+}  // namespace framed_serial

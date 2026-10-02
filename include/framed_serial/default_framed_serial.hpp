@@ -25,21 +25,21 @@
 #include <string>
 #include <vector>
 
-#include <cobs_serial/buffer.hpp>
-#include <cobs_serial/cobs_serial.hpp>
-#include <cobs_serial/serial.hpp>
+#include <framed_serial/buffer.hpp>
+#include <framed_serial/framed_serial.hpp>
+#include <framed_serial/serial.hpp>
 
-namespace cobs_serial
+namespace framed_serial
 {
 /**
  * This class is used to pack a sequence of bytes into a frame and send it to
  * the serial port and also to parse frames coming from the serial port.
  * A frames contains the data, a 16-bits CRC and delimiters.
  */
-class DefaultCobsSerial : public CobsSerial
+class DefaultFramedSerial : public FramedSerial
 {
 public:
-  explicit DefaultCobsSerial(std::unique_ptr<Serial> serial);
+  explicit DefaultFramedSerial(std::unique_ptr<Serial> serial);
 
   /**
    * Open the serial connection.
@@ -59,14 +59,14 @@ public:
   /**
    * Write a sequence of bytes to the serial port.
    * @param bytes The bytes to read.
-   * @throw cobs_serial::SerialException
+   * @throw framed_serial::SerialException
    */
   void write(const std::vector<uint8_t>& bytes) override;
 
   /**
    * Read a sequence of bytes from the serial port.
    * @return The bytes read.
-   * @throw cobs_serial::SerialException
+   * @throw framed_serial::SerialException
    */
   std::vector<uint8_t> read() override;
 
@@ -87,4 +87,4 @@ private:
 
   std::unique_ptr<Serial> serial_;
 };
-}  // namespace cobs_serial
+}  // namespace framed_serial

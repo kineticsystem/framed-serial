@@ -22,29 +22,25 @@
 
 #include <memory>
 
-#include <cobs_serial/serial_factory.hpp>
-#include <cobs_serial/default_serial_factory.hpp>
+#include <framed_serial/framed_serial_factory.hpp>
+#include <framed_serial/default_framed_serial_factory.hpp>
 #include <hardware_interface/hardware_info.hpp>
 
-namespace cobs_serial
+namespace framed_serial
 {
 /**
  * This class is used to create a default driver to interact with the hardware.
  */
-class DefaultSerialFactory : public SerialFactory
+class DefaultFramedSerialFactory : public FramedSerialFactory
 {
 public:
-  DefaultSerialFactory() = default;
+  DefaultFramedSerialFactory() = default;
 
   /**
-   * @brief Create a serial interface.
+   * @brief Create a framed serial interface.
    * @param info The hardware information.
    * @return A sarial interface to communicate with the hardware.
    */
-  std::unique_ptr<Serial> create(const hardware_interface::HardwareInfo& info) const;
-
-protected:
-  // Seam for testing.
-  virtual std::unique_ptr<Serial> create_objects() const;
+  std::unique_ptr<FramedSerial> create(const hardware_interface::HardwareInfo& info) const;
 };
-}  // namespace cobs_serial
+}  // namespace framed_serial

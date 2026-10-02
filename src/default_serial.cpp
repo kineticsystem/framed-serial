@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <cobs_serial/default_serial.hpp>
+#include <framed_serial/default_serial.hpp>
 
 #include <serial/serial.h>
 
-namespace cobs_serial
+namespace framed_serial
 {
 DefaultSerial::DefaultSerial() : serial_{ std::make_unique<serial::Serial>() }
 {
@@ -87,4 +87,4 @@ uint32_t DefaultSerial::get_baudrate() const
 {
   return serial_->getBaudrate();
 }
-}  // namespace cobs_serial
+}  // namespace framed_serial

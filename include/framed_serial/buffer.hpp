@@ -22,7 +22,7 @@
 
 #include <vector>
 
-namespace cobs_serial
+namespace framed_serial
 {
 
 enum class BufferPosition
@@ -144,4 +144,4 @@ T Buffer<T>::remove(BufferPosition position)
   }
   return out;
 }
-}  // namespace cobs_serial
+}  // namespace framed_serial

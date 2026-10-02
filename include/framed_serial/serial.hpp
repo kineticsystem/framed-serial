@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-namespace cobs_serial
+namespace framed_serial
 {
 class Serial
 {
@@ -111,4 +111,4 @@ public:
    */
   [[nodiscard]] virtual uint32_t get_baudrate() const = 0;
 };
-}  // namespace cobs_serial
+}  // namespace framed_serial

@@ -15,22 +15,22 @@ endif()
 # test_data_utils
 
 ament_add_gmock(test_data_utils test_data_utils.cpp)
-target_link_libraries(test_data_utils cobs_serial)
+target_link_libraries(test_data_utils framed_serial)
 
 ###############################################################################
 # test_crc_utils
 
 ament_add_gmock(test_crc_utils test_crc_utils.cpp)
-target_link_libraries(test_crc_utils cobs_serial)
+target_link_libraries(test_crc_utils framed_serial)
 
 ###############################################################################
 # test_default_data_interface
 
-ament_add_gmock(test_default_cobs_serial
-    test_default_cobs_serial.cpp
+ament_add_gmock(test_default_framed_serial
+    test_default_framed_serial.cpp
     mock/mock_serial.hpp
 )
-target_include_directories(test_default_cobs_serial
+target_include_directories(test_default_framed_serial
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(test_default_cobs_serial cobs_serial)
+target_link_libraries(test_default_framed_serial framed_serial)

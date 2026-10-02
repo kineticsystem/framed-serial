@@ -1,11 +1,11 @@
-# COBS Serial
+# Framed Serial
 
 ## Table of Contents <!-- omit in toc -->
 
 - [Introduction](#introduction)
 - [The Frame](#the-frame)
 - [Prerequisites](#prerequisites)
-- [Install COBS Serial](#install-cobs-serial)
+- [Install Framed Serial](#install-framed-serial)
   - [Check out the Git Repositories](#check-out-the-git-repositories)
   - [Build the Project](#build-the-project)
 - [Using the Library](#using-the-library)
@@ -18,17 +18,14 @@
 
 ## Introduction
 
-COBS Serial is a C++ library and ROS2 package that sends and receives messages over a serial port, e.g. to a microcontroller on USB. It cuts the stream of bytes into frames, so that each call to `write()` arrives as one message, and checks each frame with a CRC, so that a damaged message is detected instead of read.
+Framed Serial is a C++ library and ROS2 package that sends and receives messages over a serial port, e.g. to a microcontroller on USB. It cuts the stream of bytes into frames, so that each call to `write()` arrives as one message, and checks each frame with a CRC, so that a damaged message is detected instead of read.
 
 - Write a message as one frame, with its delimiters, escaped bytes and CRC.
 - Read the next frame, check its CRC and return its data, or throw an exception on a timeout or a damaged frame.
 - Create a connection from the parameters of a `ros2_control` hardware interface.
-- Replace the serial port with a mock in unit tests, through the `Serial` and `CobsSerial` interfaces.
+- Replace the serial port with a mock in unit tests, through the `Serial` and `FramedSerial` interfaces.
 
-It is used by [StepIt Driver](https://github.com/kineticsystem/stepit-driver), to drive stepper motors from a Teensy, and by Freezer Driver, to fire cameras from an Arduino Nano. The firmware of both speaks the same frames.
-
-> [!NOTE]
-> Despite its name, the library does not use COBS, Consistent Overhead Byte Stuffing. It frames messages with PPP-style byte stuffing, described below. The name is kept because the packages that depend on it use it.
+The frames are simple enough for a microcontroller to read and write with a few lines of code and a small buffer, so the library suits a host that talks to an Arduino, a Teensy or a similar board.
 
 ## The Frame
 
@@ -45,33 +42,33 @@ A byte equal to `0x7E` or `0x7D` inside the data or the CRC is escaped: it is se
 
 The CRC is CRC-16/KERMIT: polynomial `0x1021` reflected, initial value `0x0000`. Its check value, the CRC of the ASCII bytes `123456789`, is `0x2189`. Sent low byte first, the CRC computed over the data and the CRC together is `0x0000`, which is how a reader checks a frame.
 
-Numbers inside the data are not the library's concern. The projects that use it send them most significant byte first, and [`data_utils.hpp`](include/cobs_serial/data_utils.hpp) converts integers and floats in that order.
+Numbers inside the data are not the library's concern. The projects that use it send them most significant byte first, and [`data_utils.hpp`](include/framed_serial/data_utils.hpp) converts integers and floats in that order.
 
 ## Prerequisites
 
-To build COBS Serial, we need a computer with Ubuntu 24.04 and ROS2 Jazzy. Please refer to the document [Install ROS2 Jazzy on Ubuntu](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html).
+To build Framed Serial, we need a computer with Ubuntu 24.04 and ROS2 Jazzy. Please refer to the document [Install ROS2 Jazzy on Ubuntu](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html).
 
 The library depends on two packages:
 
 - [`serial`](https://github.com/kineticsystem/serial), branch `ros2`, a cross-platform serial port library.
 - `hardware_interface`, from `ros2_control`, for the factories that read the parameters of a hardware interface. `rosdep` installs it.
 
-## Install COBS Serial
+## Install Framed Serial
 
 ### Check out the Git Repositories
 
-COBS Serial is a package of a colcon workspace. Check it out, together with the `serial` library, in the `src` folder of the workspace:
+Framed Serial is a package of a colcon workspace. Check it out, together with the `serial` library, in the `src` folder of the workspace:
 
 ```
 cd ~/ws/src
-git clone https://github.com/kineticsystem/cobs-serial.git
+git clone https://github.com/kineticsystem/framed-serial.git
 git clone --branch ros2 https://github.com/kineticsystem/serial.git
 ```
 
 In a project that keeps its dependencies in git, add them as submodules instead:
 
 ```
-git submodule add https://github.com/kineticsystem/cobs-serial.git modules/cobs-serial
+git submodule add https://github.com/kineticsystem/framed-serial.git modules/framed-serial
 git submodule add --branch ros2 https://github.com/kineticsystem/serial.git modules/serial
 ```
 
@@ -86,13 +83,13 @@ rosdep install --ignore-src --from-paths . -y -r
 Build the packages:
 
 ```
-colcon build --packages-up-to cobs_serial
+colcon build --packages-up-to framed_serial
 ```
 
 Execute the tests:
 
 ```
-colcon test --packages-select cobs_serial
+colcon test --packages-select framed_serial
 colcon test-result --verbose
 ```
 
@@ -101,37 +98,37 @@ colcon test-result --verbose
 A ROS2 package that uses the library depends on it in its `package.xml`:
 
 ```xml
-<depend>cobs_serial</depend>
+<depend>framed_serial</depend>
 ```
 
 and links it in its `CMakeLists.txt`:
 
 ```cmake
-find_package(cobs_serial REQUIRED)
-ament_target_dependencies(my_driver cobs_serial)
+find_package(framed_serial REQUIRED)
+ament_target_dependencies(my_driver framed_serial)
 ```
 
 ### Open a Connection
 
-`DefaultSerial` is the serial port and `DefaultCobsSerial` the frames on top of it:
+`DefaultSerial` is the serial port and `DefaultFramedSerial` the frames on top of it:
 
 ```cpp
-#include <cobs_serial/default_cobs_serial.hpp>
-#include <cobs_serial/default_serial.hpp>
+#include <framed_serial/default_framed_serial.hpp>
+#include <framed_serial/default_serial.hpp>
 
-auto serial = std::make_unique<cobs_serial::DefaultSerial>();
+auto serial = std::make_unique<framed_serial::DefaultSerial>();
 serial->set_port("/dev/ttyUSB0");
 serial->set_baudrate(9600);
 serial->set_timeout(std::chrono::duration<double>{ 0.2 });
 
-cobs_serial::DefaultCobsSerial connection{ std::move(serial) };
+framed_serial::DefaultFramedSerial connection{ std::move(serial) };
 connection.open();
 
 connection.write({ 0x76 });                     // one frame
 std::vector<uint8_t> answer = connection.read();  // the data of the next frame
 ```
 
-`read()` blocks until a whole frame has arrived. It throws `cobs_serial::SerialException` when:
+`read()` blocks until a whole frame has arrived. It throws `framed_serial::SerialException` when:
 
 - **no byte arrives within the timeout**, `timeout`. The timeout applies to each byte, not to the whole frame.
 - **the first byte is not a delimiter**, `start delimiter missing`. This happens when the reader starts in the middle of a frame, e.g. right after the device resets.
@@ -142,7 +139,7 @@ The caller decides what to do: a driver usually retries the request a few times 
 
 ### Create a Connection from ros2_control
 
-A `ros2_control` hardware interface creates the connection from its `HardwareInfo`, with `DefaultCobsSerialFactory`. The factory reads these hardware parameters:
+A `ros2_control` hardware interface creates the connection from its `HardwareInfo`, with `DefaultFramedSerialFactory`. The factory reads these hardware parameters:
 
 | Parameter | Default | Description |
 |---|---|---|
@@ -163,7 +160,7 @@ For example, in the `ros2_control` block of a URDF:
 
 ### Test Without a Serial Port
 
-A driver that takes a `std::unique_ptr<cobs_serial::CobsSerial>` can be tested with a mock of that interface, which returns the frames the test chooses and records the frames the driver writes. StepIt Driver and Freezer Driver test their drivers this way, with GMock. The library tests `DefaultCobsSerial` itself against a mock of `Serial`, in [`tests/mock/mock_serial.hpp`](tests/mock/mock_serial.hpp).
+A driver that takes a `std::unique_ptr<framed_serial::FramedSerial>` can be tested with a mock of that interface, which returns the frames the test chooses and records the frames the driver writes. The library tests `DefaultFramedSerial` itself against a mock of `Serial`, in [`tests/mock/mock_serial.hpp`](tests/mock/mock_serial.hpp).
 
 ## Tests
 
@@ -171,19 +168,19 @@ A driver that takes a `std::unique_ptr<cobs_serial::CobsSerial>` can be tested w
 |---|---|
 | `test_crc_utils` | the CRC-16/KERMIT of a known sequence |
 | `test_data_utils` | the conversion of integers and floats to bytes, most significant byte first, and back, and the hex and lowercase helpers |
-| `test_default_cobs_serial` | the frames written and read: delimiters, escaped data, an escaped CRC, a failed write, and the exceptions on a timeout, a missing delimiter, a short frame and a bad CRC |
+| `test_default_framed_serial` | the frames written and read: delimiters, escaped data, an escaped CRC, a failed write, and the exceptions on a timeout, a missing delimiter, a short frame and a bad CRC |
 
 ## Limitations
 
-**A frame is limited to 256 bytes.** `DefaultCobsSerial` assembles a frame in buffers of 256 bytes, and a byte that does not fit is dropped without an error:
+**A frame is limited to 256 bytes.** `DefaultFramedSerial` assembles a frame in buffers of 256 bytes, and a byte that does not fit is dropped without an error:
 
 - **Writing:** the buffer holds the frame as it goes on the wire, with its delimiters, escaped bytes and CRC. Data of up to 125 bytes always fits, even when every byte has to be escaped; data of up to 250 bytes fits when none has to. A longer frame reaches the device cut short, and the device drops it on its CRC.
 - **Reading:** the buffer holds the data and the CRC, unescaped, so data of up to 254 bytes fits. A longer frame is worse: the CRC is computed over every byte received, so it still matches, and `read()` returns the data cut short, without its last bytes, and without an error.
 
 Keep the messages of a protocol well under these sizes, or check their length before sending them.
 
-**One request at a time.** The library reads whatever frame comes next. It does not match an answer to its request, so a protocol on top of it either waits for each answer before the next request, as StepIt Driver and Freezer Driver do, or carries its own sequence numbers.
+**One request at a time.** The library reads whatever frame comes next. It does not match an answer to its request, so a protocol on top of it either waits for each answer before the next request, or carries its own sequence numbers.
 
 ## License
 
-COBS Serial is released under the [MIT License](LICENSE).
+Framed Serial is released under the [MIT License](LICENSE).

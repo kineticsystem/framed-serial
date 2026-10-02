@@ -24,7 +24,7 @@
 #include <sstream>
 #include <string>
 
-namespace cobs_serial
+namespace framed_serial
 {
 class SerialException : public std::exception
 {
@@ -52,4 +52,4 @@ public:
     return what_.c_str();
   }
 };
-}  // namespace cobs_serial
+}  // namespace framed_serial

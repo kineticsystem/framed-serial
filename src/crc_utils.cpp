@@ -20,9 +20,9 @@
 
 #include <array>
 
-#include <cobs_serial/crc_utils.hpp>
+#include <framed_serial/crc_utils.hpp>
 
-namespace cobs_serial
+namespace framed_serial
 {
 // Pre-computed crc-table.
 // See https://cs.fit.edu/code/svn/cse2410f13team7/wireshark/wsutil/crc16.c
@@ -77,4 +77,4 @@ uint16_t crc_ccitt(const std::vector<uint8_t>& buffer)
   }
   return crc;
 }
-}  // namespace cobs_serial
+}  // namespace framed_serial

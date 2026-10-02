@@ -41,7 +41,7 @@
  * For a sample implementation of different CRC-16 see
  * http://www.lammertbies.nl/comm/software/
  */
-namespace cobs_serial
+namespace framed_serial
 {
 /**
  * This method updates the given CRC adding a new byte to the original
@@ -63,4 +63,4 @@ namespace cobs_serial
  */
 [[nodiscard]] uint16_t crc_ccitt(const std::vector<uint8_t>& buffer);
 
-}  // namespace cobs_serial
+}  // namespace framed_serial

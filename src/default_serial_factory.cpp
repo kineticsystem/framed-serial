@@ -20,12 +20,12 @@
 
 #include <chrono>
 
-#include <cobs_serial/default_serial_factory.hpp>
-#include <cobs_serial/default_serial.hpp>
+#include <framed_serial/default_serial_factory.hpp>
+#include <framed_serial/default_serial.hpp>
 
 #include <rclcpp/logging.hpp>
 
-namespace cobs_serial
+namespace framed_serial
 {
 
 const auto kLogger = rclcpp::get_logger("DefaultSerialFactory");
@@ -70,4 +70,4 @@ std::unique_ptr<Serial> DefaultSerialFactory::create_objects() const
 {
   return std::make_unique<DefaultSerial>();
 }
-}  // namespace cobs_serial
+}  // namespace framed_serial

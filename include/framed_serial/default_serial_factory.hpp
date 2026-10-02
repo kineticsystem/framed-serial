@@ -18,21 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <cobs_serial/default_cobs_serial.hpp>
-#include <cobs_serial/default_cobs_serial_factory.hpp>
-#include <cobs_serial/default_serial_factory.hpp>
-#include <cobs_serial/default_serial.hpp>
+#pragma once
 
-#include <rclcpp/logging.hpp>
+#include <memory>
 
-namespace cobs_serial
+#include <framed_serial/serial_factory.hpp>
+#include <framed_serial/default_serial_factory.hpp>
+#include <hardware_interface/hardware_info.hpp>
+
+namespace framed_serial
 {
-
-const auto kLogger = rclcpp::get_logger("DefaultCobsSerialFactory");
-
-std::unique_ptr<CobsSerial> DefaultCobsSerialFactory::create(const hardware_interface::HardwareInfo& info) const
+/**
+ * This class is used to create a default driver to interact with the hardware.
+ */
+class DefaultSerialFactory : public SerialFactory
 {
-  auto serial = DefaultSerialFactory().create(info);
-  return std::make_unique<DefaultCobsSerial>(std::move(serial));
-}
-}  // namespace cobs_serial
+public:
+  DefaultSerialFactory() = default;
+
+  /**
+   * @brief Create a serial interface.
+   * @param info The hardware information.
+   * @return A sarial interface to communicate with the hardware.
+   */
+  std::unique_ptr<Serial> create(const hardware_interface::HardwareInfo& info) const;
+
+protected:
+  // Seam for testing.
+  virtual std::unique_ptr<Serial> create_objects() const;
+};
+}  // namespace framed_serial

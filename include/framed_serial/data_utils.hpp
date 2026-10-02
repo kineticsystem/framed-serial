@@ -35,7 +35,7 @@
  *
  * lscpu | grep Endian
  */
-namespace cobs_serial::data_utils
+namespace framed_serial::data_utils
 {
 /**
  * Parse a string into an unsigned 16-bits value.
@@ -140,4 +140,4 @@ std::string to_hex(const std::vector<uint16_t>& bytes);
  */
 std::string to_lower(const std::string& str);
 
-}  // namespace cobs_serial::data_utils
+}  // namespace framed_serial::data_utils

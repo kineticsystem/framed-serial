@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <cobs_serial/data_utils.hpp>
+#include <framed_serial/data_utils.hpp>
 
 #include <algorithm>
 #include <cctype>
 
-namespace cobs_serial::data_utils
+namespace framed_serial::data_utils
 {
 constexpr std::array<char, 16> vChars = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
@@ -132,4 +132,4 @@ std::string to_lower(const std::string& str)
   return result;
 }
 
-}  // namespace cobs_serial::data_utils
+}  // namespace framed_serial::data_utils

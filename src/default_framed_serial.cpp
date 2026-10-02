@@ -20,15 +20,15 @@
 
 #include <cstdint>
 
-#include <cobs_serial/default_cobs_serial.hpp>
+#include <framed_serial/default_framed_serial.hpp>
 
-#include <cobs_serial/crc_utils.hpp>
-#include <cobs_serial/data_utils.hpp>
-#include <cobs_serial/serial_exception.hpp>
+#include <framed_serial/crc_utils.hpp>
+#include <framed_serial/data_utils.hpp>
+#include <framed_serial/serial_exception.hpp>
 
 #include <rclcpp/logging.hpp>
 
-namespace cobs_serial
+namespace framed_serial
 {
 constexpr auto kLogger = "DataHandler";
 
@@ -49,26 +49,26 @@ void add_escaped_byte(Buffer<uint8_t>& buffer, uint8_t ch)
   }
 }
 
-DefaultCobsSerial::DefaultCobsSerial(std::unique_ptr<Serial> serial) : serial_{ std::move(serial) }
+DefaultFramedSerial::DefaultFramedSerial(std::unique_ptr<Serial> serial) : serial_{ std::move(serial) }
 {
 }
 
-void DefaultCobsSerial::open()
+void DefaultFramedSerial::open()
 {
   serial_->open();
 }
 
-bool cobs_serial::DefaultCobsSerial::is_open()
+bool framed_serial::DefaultFramedSerial::is_open()
 {
   return serial_->is_open();
 }
 
-void DefaultCobsSerial::close()
+void DefaultFramedSerial::close()
 {
   serial_->close();
 }
 
-std::vector<uint8_t> DefaultCobsSerial::read()
+std::vector<uint8_t> DefaultFramedSerial::read()
 {
   read_buffer_.clear();
 
@@ -150,7 +150,7 @@ std::vector<uint8_t> DefaultCobsSerial::read()
   return buffer;
 }
 
-void DefaultCobsSerial::write(const std::vector<uint8_t>& buffer)
+void DefaultFramedSerial::write(const std::vector<uint8_t>& buffer)
 {
   write_buffer_.clear();
   uint16_t crc = 0;
@@ -178,4 +178,4 @@ void DefaultCobsSerial::write(const std::vector<uint8_t>& buffer)
   }
 }
 
-}  // namespace cobs_serial
+}  // namespace framed_serial

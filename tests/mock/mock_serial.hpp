@@ -24,11 +24,11 @@
 
 #include <string>
 
-#include <cobs_serial/serial.hpp>
+#include <framed_serial/serial.hpp>
 
-namespace cobs_serial::test
+namespace framed_serial::test
 {
-class MockSerial : public cobs_serial::Serial
+class MockSerial : public framed_serial::Serial
 {
 public:
   MOCK_METHOD(void, open, (), (override));
@@ -43,4 +43,4 @@ public:
   MOCK_METHOD(void, set_baudrate, (uint32_t baudrate), (override));
   MOCK_METHOD(uint32_t, get_baudrate, (), (override, const));
 };
-}  // namespace cobs_serial::test
+}  // namespace framed_serial::test

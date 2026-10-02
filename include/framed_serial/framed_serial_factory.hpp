@@ -22,15 +22,15 @@
 
 #include <memory>
 
-#include <cobs_serial/serial.hpp>
+#include <framed_serial/framed_serial.hpp>
 
 #include <hardware_interface/hardware_info.hpp>
 
-namespace cobs_serial
+namespace framed_serial
 {
-class SerialFactory
+class FramedSerialFactory
 {
 public:
-  virtual std::unique_ptr<Serial> create(const hardware_interface::HardwareInfo& info) const = 0;
+  virtual std::unique_ptr<FramedSerial> create(const hardware_interface::HardwareInfo& info) const = 0;
 };
-}  // namespace cobs_serial
+}  // namespace framed_serial
