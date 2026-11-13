@@ -63,12 +63,26 @@ git clone https://github.com/kineticsystem/framed-serial.git
 git clone --branch ros2 https://github.com/kineticsystem/serial.git
 ```
 
-In a project that keeps its dependencies in git, add them as submodules instead:
+A project that depends on Framed Serial lists both repositories in a `.repos` file, each pinned to a commit or a tag, and imports them with `vcs`, e.g. into a `modules` folder that git ignores:
+
+```yaml
+repositories:
+  serial:
+    type: git
+    url: https://github.com/kineticsystem/serial.git
+    version: <commit>
+  framed-serial:
+    type: git
+    url: https://github.com/kineticsystem/framed-serial.git
+    version: <commit>
+```
 
 ```
-git submodule add https://github.com/kineticsystem/framed-serial.git modules/framed-serial
-git submodule add --branch ros2 https://github.com/kineticsystem/serial.git modules/serial
+mkdir -p modules
+vcs import --input <project>.repos modules
 ```
+
+Put the commits of `serial` and `framed-serial` in place of `<commit>`, and the name of the file in place of `<project>.repos`. A workspace that brings together several projects using Framed Serial lists it once, in its own `.repos` file: colcon refuses two packages of the same name.
 
 ### Build the Project
 
