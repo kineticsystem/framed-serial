@@ -1,0 +1,18 @@
+# The C++ code against .clang-format, with the clang-format of Ubuntu 24.04
+# (18), the one the StepIt containers use. Fix a failure with `make format`
+# in the build folder, or `clang-format -i` on the files it names.
+
+name: Format
+
+on: [push, pull_request]
+
+jobs:
+  clang-format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update -qq && sudo apt-get install -qq -y clang-format
+      - name: Check the format
+        run: clang-format --dry-run --Werror $(git ls-files '*.hpp' '*.cpp')

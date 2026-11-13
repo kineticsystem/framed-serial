@@ -1,0 +1,29 @@
+# The ament linters, in the ROS image, which ships them, as in StepIt Motors.
+# ament_copyright needs CONTRIBUTING.md next to LICENSE, as the package is the
+# root of the repository.
+
+name: ROS Lint
+
+on: [push, pull_request]
+
+jobs:
+  ament_lint:
+    name: ament_${{ matrix.linter }}
+    runs-on: ubuntu-24.04
+    container: ros:jazzy-ros-base
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - linter: copyright
+          - linter: lint_cmake
+          - linter: cpplint
+            # As in StepIt Motors.
+            arguments: --linelength=121 --filter=-whitespace/newline
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          ament_${{ matrix.linter }} ${{ matrix.arguments }} .
