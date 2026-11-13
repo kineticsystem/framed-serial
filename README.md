@@ -1,5 +1,9 @@
 # Framed Serial
 
+[![CI](https://github.com/kineticsystem/framed-serial/actions/workflows/industrial_ci.yml/badge.svg)](https://github.com/kineticsystem/framed-serial/actions/workflows/industrial_ci.yml)
+[![Format](https://github.com/kineticsystem/framed-serial/actions/workflows/ci-format.yml/badge.svg)](https://github.com/kineticsystem/framed-serial/actions/workflows/ci-format.yml)
+[![Linters](https://github.com/kineticsystem/framed-serial/actions/workflows/ci-ros-lint.yml/badge.svg)](https://github.com/kineticsystem/framed-serial/actions/workflows/ci-ros-lint.yml)
+
 ## Table of Contents <!-- omit in toc -->
 
 - [Introduction](#introduction)
@@ -12,6 +16,7 @@
   - [Open a Connection](#open-a-connection)
   - [Test Without a Serial Port](#test-without-a-serial-port)
 - [Tests](#tests)
+- [Continuous Integration](#continuous-integration)
 - [Limitations](#limitations)
 - [License](#license)
 
@@ -160,6 +165,18 @@ A driver that takes a `std::unique_ptr<framed_serial::FramedSerial>` can be test
 | `test_crc_utils` | the CRC-16/KERMIT of a known sequence |
 | `test_data_utils` | the conversion of integers and floats to bytes, most significant byte first, and back, and the hex and lowercase helpers |
 | `test_default_framed_serial` | the frames written and read: delimiters, escaped data, an escaped CRC, a failed write, and the exceptions on a timeout, a missing delimiter, a short frame and a bad CRC |
+
+## Continuous Integration
+
+Three GitHub Actions workflows run on every push and pull request, as in the StepIt projects that use the library:
+
+| Workflow | What it checks |
+|---|---|
+| [`industrial_ci.yml`](.github/workflows/industrial_ci.yml) | Builds the package and runs its tests with [Industrial CI](https://github.com/ros-industrial/industrial_ci), against the main and the testing ROS repositories. |
+| [`ci-format.yml`](.github/workflows/ci-format.yml) | The C++ code against [`.clang-format`](.clang-format), with the clang-format of Ubuntu 24.04. |
+| [`ci-ros-lint.yml`](.github/workflows/ci-ros-lint.yml) | The ament linters: copyright, lint_cmake and cpplint. |
+
+Industrial CI builds `serial` first, from [`framed-serial.repos`](framed-serial.repos), at the commit StepIt Motors and StepIt Freezer build it with: move it there when they move. `ament_copyright` needs [`CONTRIBUTING.md`](CONTRIBUTING.md) next to `LICENSE`, as the package is the root of the repository.
 
 ## Limitations
 

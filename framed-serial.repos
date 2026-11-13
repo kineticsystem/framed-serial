@@ -1,0 +1,8 @@
+# The upstream workspace of industrial_ci, see .github/workflows/industrial_ci.yml:
+# serial, at the commit the projects that use Framed Serial build it with, e.g.
+# StepIt Motors and StepIt Freezer.
+repositories:
+  serial:
+    type: git
+    url: https://github.com/kineticsystem/serial.git
+    version: d8d160678aa0b31cdf467c052b954fa287cc6cdf
