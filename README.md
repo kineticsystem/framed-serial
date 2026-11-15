@@ -30,6 +30,8 @@ Framed Serial is a C++ library and ROS2 package that sends and receives messages
 
 The frames are simple enough for a microcontroller to read and write with a few lines of code and a small buffer, so the library suits a host that talks to an Arduino, a Teensy or a similar board.
 
+How the library is built, and where to start a change, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## The Frame
 
 A frame is the data of one message, its CRC, and a delimiter at each end:
