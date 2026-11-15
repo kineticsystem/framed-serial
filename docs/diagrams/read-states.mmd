@@ -1,0 +1,81 @@
+---
+config:
+  theme: base
+  fontFamily: "Arial, Helvetica, sans-serif"
+  flowchart:
+    curve: basis
+    padding: 12
+    nodeSpacing: 46
+    rankSpacing: 32
+    subGraphTitleMargin:
+      top: 4
+      bottom: 10
+  class:
+    padding: 10
+  themeVariables:
+    lineColor: "#94a3b8"
+    textColor: "#64748b"
+    primaryColor: "#f1f5f9"
+    primaryBorderColor: "#64748b"
+    primaryTextColor: "#0f172a"
+    secondaryColor: "#f1f5f9"
+    secondaryBorderColor: "#64748b"
+    secondaryTextColor: "#0f172a"
+    tertiaryColor: "#f1f5f9"
+    tertiaryBorderColor: "#64748b"
+    tertiaryTextColor: "#0f172a"
+    mainBkg: "#f1f5f9"
+    nodeBorder: "#64748b"
+    nodeTextColor: "#0f172a"
+    classText: "#0f172a"
+    clusterBkg: "transparent"
+    clusterBorder: "#94a3b8"
+    titleColor: "#64748b"
+    edgeLabelBackground: "#ffffff"
+  themeCSS: >
+    svg, .label, .nodeLabel, .edgeLabel, foreignObject div { font-family: Arial, Helvetica, sans-serif; }
+    .node rect, .node polygon, .node path {
+      filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.18));
+    }
+    .node rect { rx: 14px; ry: 14px; }
+    .cluster rect { rx: 18px; ry: 18px; }
+    .edgeLabel, .edgeLabel p, .edgeLabel span {
+      background: #ffffff; color: #475569; border-radius: 999px;
+    }
+    .edgeLabel p { padding: 3px 10px; }
+    .labelBkg { background: transparent !important; fill: none !important; }
+---
+flowchart TB
+    Start(["<b>read()</b><br/>empty buffer, CRC 0"])
+    Waiting("<b>Waiting</b><br/>for the start delimiter")
+    Reading{{"<b>ReadingMessage</b><br/>stores the byte, updates the CRC"}}
+    Escaped("<b>ReadingEscapedByte</b><br/>stores the byte XOR 0x20")
+    Check("<b>End of the frame</b><br/>3 bytes or more, CRC 0?")
+    Done(["<b>Returns the data</b><br/>without the 2 bytes of the CRC"])
+    Throw(["<b>Throws SerialException</b><br/>also on a timeout, in any state"])
+
+    Start --> Waiting
+    Waiting == "0x7E" ==> Reading
+    Reading -- "0x7D" --> Escaped
+    Escaped -- "any byte" --> Reading
+    Reading == "0x7E" ==> Check
+    Check == "yes" ==> Done
+    Waiting -. "any other byte" .-> Throw
+    Check -. "too short, or bad CRC" .-> Throw
+
+    classDef human fill:#ffe4e6,stroke:#e11d48,stroke-width:2px,color:#881337
+    classDef voice fill:#ccfbf1,stroke:#0d9488,stroke-width:2px,color:#134e4a
+    classDef mind  fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#4c1d95
+    classDef brain fill:#7c3aed,stroke:#5b21b6,stroke-width:2px,color:#ffffff
+    classDef robot fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    classDef data  fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+    classDef ext   fill:#f1f5f9,stroke:#64748b,stroke-width:2px,color:#0f172a
+
+    class Start,Done human
+    class Waiting,Escaped,Check mind
+    class Reading brain
+    class Throw robot
+
+    linkStyle 0,2,3 stroke:#8b5cf6,stroke-width:2px
+    linkStyle 1,4,5 stroke:#7c3aed,stroke-width:3px
+    linkStyle 6,7 stroke:#d97706,stroke-width:2px
