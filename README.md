@@ -30,7 +30,7 @@ Framed Serial is a C++ library and ROS2 package that sends and receives messages
 
 The frames are simple enough for a microcontroller to read and write with a few lines of code and a small buffer, so the library suits a host that talks to an Arduino, a Teensy or a similar board.
 
-How the library is built, and where to start a change, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+How the library is built, and where to start a change, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Where the code falls short of what it is meant to do, with the measurements, is in [docs/Review.md](docs/Review.md).
 
 ## The Frame
 
@@ -43,11 +43,13 @@ A frame is the data of one message, its CRC, and a delimiter at each end:
 | CRC | 2 bytes | the CRC-16/KERMIT of the data, low byte first, escaped |
 | end delimiter | 1 byte | `0x7E` |
 
-A byte equal to `0x7E` or `0x7D` inside the data or the CRC is escaped: it is sent as `0x7D` followed by the byte XOR `0x20`. So `0x7E` becomes `0x7D 0x5E` and `0x7D` becomes `0x7D 0x5D`, and a `0x7E` on the wire is always a delimiter. A reader that joins the stream in the middle of a frame waits for the next delimiter and loses nothing else.
+A byte equal to `0x7E` or `0x7D` inside the data or the CRC is escaped: it is sent as `0x7D` followed by the byte XOR `0x20`. So `0x7E` becomes `0x7D 0x5E` and `0x7D` becomes `0x7D 0x5D`, and a `0x7E` on the wire is a delimiter. The one exception is a damaged frame that leaves a `0x7E` right after a `0x7D`: the reader takes it as an escaped byte, not as a delimiter.
+
+The reader of this library does not look for the next delimiter. When it joins the stream in the middle of a frame, `read()` throws, and the caller puts it back in step: see [Open a Connection](#open-a-connection).
 
 The CRC is CRC-16/KERMIT: polynomial `0x1021` reflected, initial value `0x0000`. Its check value, the CRC of the ASCII bytes `123456789`, is `0x2189`. Sent low byte first, the CRC computed over the data and the CRC together is `0x0000`, which is how a reader checks a frame.
 
-Numbers inside the data are not the library's concern. The projects that use it send them most significant byte first, and [`data_utils.hpp`](include/framed_serial/data_utils.hpp) converts integers and floats in that order.
+Numbers inside the data are not the library's concern. The projects that use it send them most significant byte first, and [`data_utils.hpp`](include/framed_serial/data_utils.hpp) converts 16-bit and 32-bit integers and 32-bit floats in that order, the floats on a little-endian host only. It also declares `from_int8()` and `to_int8()`, which are defined nowhere: a call to them does not link.
 
 ## Prerequisites
 
@@ -154,7 +156,9 @@ std::vector<uint8_t> answer = connection.read();  // the data of the next frame
 - **the frame is shorter than three bytes**, `incorrect frame length`: one byte of data and the two bytes of the CRC.
 - **the CRC does not match**, `CRC error`.
 
-The caller decides what to do: a driver usually retries the request a few times before it reports the device as lost.
+The exceptions of the port are not caught, and they are not of that type: `serial::IOException`, `serial::SerialException` and `serial::PortNotOpenedException`, e.g. for a port that does not exist, a device that is unplugged or a port that is not open, and `std::invalid_argument` from `open()` when no port is set. They pass through `read()`, `write()` and `open()` as they are, and have only `std::exception` in common with `framed_serial::SerialException`: a caller that must survive a lost device catches `std::exception`.
+
+The caller decides what to do: a driver usually retries the request a few times before it reports the device as lost. A retry alone is not always enough. `read()` stops where it failed and does not look for the next frame, so after `start delimiter missing`, `incorrect frame length` or a `timeout` in the middle of a frame, the next calls start inside a frame and fail too. Before it sends the request again, the caller empties the port, by calling `read()` until it throws `timeout` with nothing left to come, or closes the port and opens it again. [docs/Review.md](docs/Review.md) measures each case.
 
 ### Test Without a Serial Port
 
@@ -184,10 +188,12 @@ Industrial CI builds `serial` first, from [`framed-serial.repos`](framed-serial.
 
 **A frame is limited to 256 bytes.** `DefaultFramedSerial` assembles a frame in buffers of 256 bytes, and a byte that does not fit is dropped without an error:
 
-- **Writing:** the buffer holds the frame as it goes on the wire, with its delimiters, escaped bytes and CRC. Data of up to 125 bytes always fits, even when every byte has to be escaped; data of up to 250 bytes fits when none has to. A longer frame reaches the device cut short, and the device drops it on its CRC.
+- **Writing:** the buffer holds the frame as it goes on the wire, with its delimiters, escaped bytes and CRC. Data of up to 125 bytes always fits, even when every byte has to be escaped; data of up to 250 bytes fits when none has to. A longer frame leaves cut short, without its end delimiter, and `write()` returns normally. The device ends it on the start delimiter of the next frame and drops it on its CRC; a device that then waits for a new start delimiter loses that next frame too.
 - **Reading:** the buffer holds the data and the CRC, unescaped, so data of up to 254 bytes fits. A longer frame is worse: the CRC is computed over every byte received, so it still matches, and `read()` returns the data cut short, without its last bytes, and without an error.
 
-Keep the messages of a protocol well under these sizes, or check their length before sending them.
+Keep the messages of a protocol well under these sizes, or check their length before sending them. A device with a smaller buffer sets a lower limit: the sizes above are those of this library only.
+
+**No empty message.** A frame holds at least one byte of data, but `write()` does not check it: called with no bytes, it sends `7E 00 00 7E`, which `read()` refuses with `incorrect frame length`.
 
 **One request at a time.** The library reads whatever frame comes next. It does not match an answer to its request, so a protocol on top of it either waits for each answer before the next request, or carries its own sequence numbers.
 

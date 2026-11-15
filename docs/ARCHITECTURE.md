@@ -199,7 +199,7 @@ Both firmwares keep the three constants in their `SerialPort.cpp` and the CRC ta
 
 **Two interfaces, one above the frames and one below.** A driver holds a `FramedSerial` and is tested with whole messages; the framing holds a `Serial` and is tested with bytes. The price is a virtual call per byte and a `Serial` interface that repeats the part of `serial::Serial` we use, to be extended by hand.
 
-**Byte stuffing with a delimiter, not a length.** A `0x7E` on the wire is always the edge of a frame, so a reader needs three states, no length field and no timer to find a frame. The price is the size: each `0x7E` or `0x7D` costs two bytes, twice the data at worst.
+**Byte stuffing with a delimiter, not a length.** A `0x7E` on the wire is the edge of a frame, except right after a `0x7D`, which only a damaged frame produces, so a reader needs three states, no length field and no timer to find a frame. The price is the size: each `0x7E` or `0x7D` costs two bytes, twice the data at worst.
 
 **A CRC whose check is a comparison with zero.** CRC-16/KERMIT, sent low byte first, lets the reader run one CRC over data and CRC alike. The price of its initial value of 0 is that `0x00` bytes at the start of the data do not change the CRC: `00 71 01 00 00 0B B8` and `71 01 00 00 0B B8` both have `0x1705`, as the frames of the `write` and `read` tests show.
 
